@@ -10,6 +10,11 @@ This custom authenticator is utilized in the following workshop:
 
 You will find there a cool workshop covering MFA, passkeys, and step-up authentication.
 
+## Copy gson-2.10.1-sources.jar to <KEYCLOAK_HOME>/lib/lib/deployment
+
+cp /Users/mwangigikoyo/.m2/repository/com/google/code/gson/gson/2.10.1/gson-2.10.1-sources.jar ../lib/lib/deployment/
+
+
 ## How does it work?
 
 If this authenticator gets configured as part of a browser based login flow, Keycloak will do:
