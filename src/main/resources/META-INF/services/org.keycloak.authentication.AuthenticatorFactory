@@ -1,1 +1,1 @@
-net.sozuri.keycloak.authenticator.FaceAuthenticatorFactory
+net.sozuri.keycloak.authenticator.BiometricsAuthenticatorFactory

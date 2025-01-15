@@ -36,10 +36,10 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import net.sozuri.keycloak.authenticator.model.IdentiYuCustomer;
 
-public class FaceAuthenticator extends WebAuthnPasswordlessAuthenticator {
+public class BiometricsAuthenticator extends WebAuthnPasswordlessAuthenticator {
 	
 	
-	public FaceAuthenticator(KeycloakSession session) {
+	public BiometricsAuthenticator(KeycloakSession session) {
 		super(session);
 	}
 

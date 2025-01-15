@@ -5,9 +5,9 @@ import org.keycloak.authentication.authenticators.browser.WebAuthnAuthenticatorF
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.credential.WebAuthnCredentialModel;
 
-public class FaceAuthenticatorFactory extends WebAuthnAuthenticatorFactory {
+public class BiometricsAuthenticatorFactory extends WebAuthnAuthenticatorFactory {
 
-	public static final String PROVIDER_ID = "identiyu-webauthn-authenticator-Beta1";
+	public static final String PROVIDER_ID = "identiyu-biometrics-webauthn-authenticator-Beta1";
 
     @Override
     public String getReferenceCategory() {
@@ -16,17 +16,17 @@ public class FaceAuthenticatorFactory extends WebAuthnAuthenticatorFactory {
 
     @Override
     public String getDisplayType() {
-        return "IdentiYu - WebAuthn Passwordless Conditional Mediator Authenticator-Beta1";
+        return "IdentiYu - WebAuthn Biometrics Authenticator-Beta1";
     }
 
     @Override
     public String getHelpText() {
-        return "IdentiYu - Authenticator for Passwordless WebAuthn authentication that support Passkeys Form-fill-Beta1";
+        return "IdentiYu - Authenticator for Passwordless WebAuthn authentication that support Biometrics Form-fill-Beta1";
     }
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        return new FaceAuthenticator(session);
+        return new BiometricsAuthenticator(session);
     }
 
     @Override
