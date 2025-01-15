@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
-        <project.build.artifactId>identiyu-keycloak-webauthn-conditional-mediation</project.build.artifactId>
+        <project.build.artifactId>identiyu-keycloak-webauthn-conditional-mediation-Beta2</project.build.artifactId>
         <maven.compiler.source>11</maven.compiler.source>
 	    <maven.compiler.target>11</maven.compiler.target>
 	    <maven.compiler.release>11</maven.compiler.release>
@@ -15,7 +15,7 @@
         
     <groupId>net.sozuri.keycloak</groupId>
     <artifactId>identiyu-keycloak-webauthn-conditional-mediation</artifactId>
-    <version>Beta1</version>
+    <version>Beta2</version>
 
     
 
