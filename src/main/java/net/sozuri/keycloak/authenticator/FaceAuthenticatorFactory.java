@@ -8,7 +8,7 @@ import org.keycloak.models.credential.WebAuthnCredentialModel;
 
 public class FaceAuthenticatorFactory extends WebAuthnAuthenticatorFactory {
 
-	public static final String PROVIDER_ID = "identiyu-webauthn-authenticator";
+	public static final String PROVIDER_ID = "identiyu-webauthn-authenticator-Beta1";
 
     @Override
     public String getReferenceCategory() {
@@ -17,12 +17,12 @@ public class FaceAuthenticatorFactory extends WebAuthnAuthenticatorFactory {
 
     @Override
     public String getDisplayType() {
-        return "IdentiYu - WebAuthn Passwordless Conditional Mediator Authenticator";
+        return "IdentiYu - WebAuthn Passwordless Conditional Mediator Authenticator-Beta1";
     }
 
     @Override
     public String getHelpText() {
-        return "IdentiYu - Authenticator for Passwordless WebAuthn authentication that support Passkeys Form-fill";
+        return "IdentiYu - Authenticator for Passwordless WebAuthn authentication that support Passkeys Form-fill-Beta1";
     }
 
     @Override
