@@ -31,6 +31,10 @@
     </dependencyManagement>
 
     <dependencies>
+	     <dependency>
+	        <groupId>log4j</groupId>
+	        <artifactId>log4j</artifactId>
+	    </dependency>
     	<dependency>
 		    <groupId>com.google.code.gson</groupId>
 		    <artifactId>gson</artifactId>
@@ -102,16 +106,17 @@
                                         <exclude>META-INF/*.RSA</exclude>
                                         <exclude>org/keycloak/**</exclude>
                                     </excludes>
-                                    <relocations>
-					                    <!-- Avoid potential classpath conflicts -->
-					                    <relocation>
-					                        <pattern>org.apache.log4j</pattern>
-					                        <shadedPattern>shaded.org.apache.log4j</shadedPattern>
-					                    </relocation>
-					                </relocations>
+                                    
 					                <createDependencyReducedPom>false</createDependencyReducedPom>
                                 </filter>
                             </filters>
+                            <relocations>
+			                    <!-- Avoid potential classpath conflicts -->
+			                    <relocation>
+			                        <pattern>org.apache.log4j</pattern>
+			                        <shadedPattern>shaded.org.apache.log4j</shadedPattern>
+			                    </relocation>
+			                </relocations>
                         </configuration>
                     </execution>
                 </executions>
