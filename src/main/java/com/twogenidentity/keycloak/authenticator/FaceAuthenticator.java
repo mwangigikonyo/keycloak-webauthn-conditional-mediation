@@ -127,124 +127,17 @@ public class FaceAuthenticator extends WebAuthnPasswordlessAuthenticator {
 	        
 	        String referenceFaceId = createFaceId(getImageBase64(identiyuCustomer.getFace1Url()));
 	        String probeFaceId = createFaceId(imageData);
-	        int score = probeFaceSimilarityToReferenceFace(referenceFaceId, probeFaceId);
+	        double score = probeFaceSimilarityToReferenceFace(referenceFaceId, probeFaceId);
 	        logger.info("\n\n\t identiyuCustomer: "+ identiyuCustomer+"\n\t");
 	        
 	        if(score>=0.4) {
 	        	return true;
-	        }else if(score<0.4) {
+	        }else {
 	        	return false;
 	        }
-	        
-	        int i = 100;
-			if(i==100) {
-				logger.info("\n\n\t Validating face. Faking a true for now.");
-				return false;
-			}
+			
 			
 	        
-			
-	        
-	        byte[] decodedImage = null;
-	        try {
-	            decodedImage = Base64.getDecoder().decode(imageData.getBytes("UTF-8"));
-	        } catch (UnsupportedEncodingException e1) {
-	            e1.printStackTrace();
-	        }
-	        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-	             
-	             final String subscriptionKey = "<Subscription Key>";
-	 
-	             final String uriBase =
-	                    "https://<My Endpoint String>.com/face/v1.0/detect";
-	            logger.info(" Calling Face Id. ");
-	            URIBuilder builder = new URIBuilder(uriBase);
-	            builder.setParameter("returnFaceId", "true");
-	            builder.setParameter("returnFaceLandmarks", "false");
-	            builder.setParameter("returnFaceAttributes", "");
-	            URI uri = builder.build();
-	            HttpPost request = new HttpPost(uri);
-	             
-	            request.setHeader("Content-Type", "application/octet-stream");
-	            request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
-	             
-	            ByteArrayEntity reqEntity = new ByteArrayEntity(decodedImage);
-	            request.setEntity(reqEntity);
-	 
-	            HttpResponse response = client.execute(request);
-	            HttpEntity entity = response.getEntity();
-	         
-	            String faceId = "";
-	             
-	            if (entity != null)
-	            {
-	                // Format and display the JSON response.
-	                System.out.println("REST Response:\n");
-	 
-	                String jsonString = EntityUtils.toString(entity).trim();
-	                if (jsonString.charAt(0) == '[') {
-	                	JsonElement jsonElement = JsonParser.parseString(jsonString);
-	                	JsonArray jsonArray = jsonElement.getAsJsonArray();
-	                	//JSONArray jsonArray = new JSONArray(jsonString);
-	                    System.out.println(jsonArray.toString());
-	                    if(jsonArray.size() > 1) {
-	                        throw new Error("Multiple faces in the image");
-	                    }
-	                    faceId = jsonArray.get(0).getAsJsonObject()
-	                    		.get("faceId").getAsString();
-	                }
-	                else if (jsonString.charAt(0) == '{') {
-	                	JsonElement jsonElement = JsonParser.parseString(jsonString);
-	                	
-	                    JsonObject jsonObject = jsonElement.getAsJsonObject();
-	                    System.out.println(jsonObject.toString());
-	                    faceId = jsonObject.get("faceId").getAsString();
-	                } else {
-	                    System.out.println(jsonString);
-	                }
-	            }
-	             
-	             
-	            URIBuilder builderVerify = new URIBuilder("https://westus.api.cognitive.microsoft.com/face/v1.0/verify");
-	 
-	 
-	            URI uriVerify = builderVerify.build();
-	            HttpPost requestVerify = new HttpPost(uriVerify);
-	            requestVerify.setHeader("Content-Type", "application/json");
-	            requestVerify.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
-	 
-	            String personId = context.getUser().getFirstAttribute("personId");
-	            String personGroupId = context.getUser().getFirstAttribute("personGroupId");
-	 
-	 
-	            // Request body
-	            StringEntity reqEntityVerify = new StringEntity("{\n" + 
-	                    "    \"faceId\": \""+ faceId +"\",\n" + 
-	                    "    \"personId\": \""+ personId +"\",\n" + 
-	                    "    \"personGroupId\": \""+ personGroupId +"\",\n" + 
-	                    "}");
-	            request.setEntity(reqEntityVerify);
-	 
-	            HttpResponse responseVerify = client.execute(request);
-	            HttpEntity entityVerify = responseVerify.getEntity();
-	 
-	            if (entityVerify != null) 
-	            {
-	                String jsonStringVerify = EntityUtils.toString(entityVerify).trim();
-	                JsonElement jsonElement = JsonParser.parseString(jsonStringVerify);
-                	
-                    JsonObject jsonObject = jsonElement.getAsJsonObject();
-                    
-	                JsonObject jsonObjectVerify = jsonObject.getAsJsonObject();
-	                return jsonObjectVerify.get("isIdentical").getAsBoolean();
-	            }
-	 
-	        } catch (IOException | URISyntaxException e) {
-	            // TODO Auto-generated catch block
-	            e.printStackTrace();
-	            return true;
-	        }
-	        return true;
 		}catch(Exception e) {
 			logger.error(e);
 			return true;
@@ -258,9 +151,9 @@ public class FaceAuthenticator extends WebAuthnPasswordlessAuthenticator {
 		
 	}*/
 
-	private int probeFaceSimilarityToReferenceFace(String referenceFaceId, String probeFaceId) {
+	private double probeFaceSimilarityToReferenceFace(String referenceFaceId, String probeFaceId) {
 		CloseableHttpClient client = null;
-		int score = -1;
+		double score = -1.0;
 		
 		try {
 			
@@ -280,15 +173,22 @@ public class FaceAuthenticator extends WebAuthnPasswordlessAuthenticator {
             HttpPost request = new HttpPost(uri);
             JsonObject referenceFace = new JsonObject();
             referenceFace.addProperty("referenceFace", "/api/v1/faces/"+referenceFaceId);
-            logger.info(" \n\n\t referenceFace.getAsString() ::: "+referenceFace.getAsString());
-	        StringEntity reqEntity = new StringEntity(referenceFace.toString(),ContentType.APPLICATION_JSON);
-            request.setEntity(reqEntity);
+            logger.info(" \n\n\t referenceFace.toString() ::: "+referenceFace.toString());
+	        //StringEntity reqEntity = new StringEntity(referenceFace.toString(),ContentType.APPLICATION_JSON);
+	        StringEntity reqEntity = new StringEntity(referenceFace.toString());
+            
+	        request.setEntity(reqEntity);
+	        request.setHeader("Content-Type", "application/json");
             
             HttpResponse response = client.execute(request);
             HttpEntity entity = response.getEntity();
             
             String jsonString = EntityUtils.toString(entity).trim();
             logger.info("\n\n\t\t Probe face similarity resp >>>>>>> jsonString :: "+jsonString+"\n\n\n\n");
+            JsonElement jsonElement = JsonParser.parseString(jsonString);
+            JsonObject responseJson = jsonElement.getAsJsonObject();
+            logger.info("\n\n\t\t probeSimilarity response json :: "+responseJson.toString()+"\n\n\n\n");
+            score = responseJson.get("score").getAsDouble();	
             /*ObjectMapper objectMapper = JsonMapper.builder()
                     .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
                     .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
@@ -305,6 +205,7 @@ public class FaceAuthenticator extends WebAuthnPasswordlessAuthenticator {
             logger.info("\n\n\n\t IdentiyuCustomer#toString(): "+identiYuCustomers.toString()+" \n\n\n");
 			*/
 		}catch(Exception e) {
+			e.printStackTrace();
 			logger.error(e);
 		}finally {
 			try {
@@ -341,13 +242,7 @@ public class FaceAuthenticator extends WebAuthnPasswordlessAuthenticator {
             logger.info("\n\n\t\t at createFaceId Full URL >>>>>>>: " + fullUrl+"\n\n");
             HttpPost request = new HttpPost(uri);
             
-            byte[] decodedImage = null;
-	        try {
-	            decodedImage = Base64.getDecoder().decode(imageBase64.getBytes("UTF-8"));
-	        } catch (UnsupportedEncodingException e1) {
-	            e1.printStackTrace();
-	        }
-	        JsonObject image = new JsonObject();
+            JsonObject image = new JsonObject();
 	        image.addProperty("data", imageBase64);
 	        
 	        
@@ -356,18 +251,14 @@ public class FaceAuthenticator extends WebAuthnPasswordlessAuthenticator {
 	        
 	        JsonObject faceSizeRatio = new JsonObject();
 	        faceSizeRatio.addProperty("min", 0.05);
-	        faceSizeRatio.addProperty("min", 0.5);
+	        faceSizeRatio.addProperty("max", 0.5);
 	        detection.add("faceSizeRatio", faceSizeRatio);
-	        
-	        
-	        
+	        	        	        
 	        JsonObject jsob = new JsonObject();
 	        jsob.add("image", image);
 	        jsob.add("detection", detection);
 	        
 	        
-	        logger.info("\n\n\t\t payload :: jsob.getAsString() :::: "+jsob.toString()+"\n\n\n\n");
-             
 	        StringEntity reqEntity = new StringEntity(jsob.toString());
             request.setEntity(reqEntity);
             
@@ -379,6 +270,10 @@ public class FaceAuthenticator extends WebAuthnPasswordlessAuthenticator {
             
             String jsonString = EntityUtils.toString(entity).trim();
             logger.info("\n\n\t\t create Face resp >>>>>>> jsonString :: "+jsonString+"\n\n\n\n");
+            JsonElement jsonElement = JsonParser.parseString(jsonString);
+        	
+            JsonObject responseJson = jsonElement.getAsJsonObject();
+            logger.info("\n\n\t\t create Face resp >>>>>>> responseJson.get(\"id\").getAsString() :: "+responseJson.get("id").getAsString()+"\n\n\n\n");
             /*ObjectMapper objectMapper = JsonMapper.builder()
                     .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
                     .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
@@ -394,6 +289,7 @@ public class FaceAuthenticator extends WebAuthnPasswordlessAuthenticator {
             
             logger.info("\n\n\n\t IdentiyuCustomer#toString(): "+identiYuCustomers.toString()+" \n\n\n");
 			*/
+            ref = responseJson.get("id").getAsString();
 		}catch(Exception e) {
 			e.printStackTrace();
 			logger.error(e);
