@@ -4,16 +4,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.sozuri.keycloak</groupId>
-    <artifactId>identiyu-keycloak-webauthn-conditional-mediation</artifactId>
-    <version>1.0.1</version>
-
     <properties>
+        <artifactId>identiyu-keycloak-webauthn-conditional-mediation</artifactId>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <keycloak.version>22.0.3</keycloak.version>
     </properties>
+    
+    
+    <groupId>net.sozuri.keycloak</groupId>
+    <artifactId>${artifactId}</artifactId>
+    <version>1.0.1</version>
+
+    
 
     <dependencyManagement>
         <dependencies>
@@ -87,7 +91,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>keycloak-webauthn-conditional-mediation</finalName>
+                            <finalName>${artifactId}</finalName>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
