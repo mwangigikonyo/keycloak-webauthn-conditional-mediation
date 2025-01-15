@@ -106,8 +106,6 @@
                                         <exclude>META-INF/*.RSA</exclude>
                                         <exclude>org/keycloak/**</exclude>
                                     </excludes>
-                                    
-					                <createDependencyReducedPom>false</createDependencyReducedPom>
                                 </filter>
                             </filters>
                             <relocations>
@@ -116,6 +114,8 @@
 			                        <pattern>org.apache.log4j</pattern>
 			                        <shadedPattern>shaded.org.apache.log4j</shadedPattern>
 			                    </relocation>
+			                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                                
 			                </relocations>
                         </configuration>
                     </execution>
