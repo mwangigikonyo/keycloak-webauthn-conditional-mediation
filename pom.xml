@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.twogenidentity.keycloak</groupId>
-    <artifactId>keycloak-webauthn-conditional-mediation</artifactId>
+    <groupId>net.sozuri.keycloak</groupId>
+    <artifactId>identiyu-keycloak-webauthn-conditional-mediation</artifactId>
     <version>1.0.1</version>
 
     <properties>
