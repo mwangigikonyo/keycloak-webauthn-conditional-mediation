@@ -1,4 +1,6 @@
-# Keycloak: Webauthn Conditional Meditation Authenticator
+# Keycloak: Webauthn Conditional Meditation Authenticator - With Biometrics Implementation
+
+Short video demo - [VIDEO DEMO](https://www.youtube.com/watch?v=wEWHumC-XZA) 
 
 This is a webauthn authenticator that supports [WebAuth Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI) or Passkey autofill. It's based on the OOTB [WebAuthnPasswordlessAuthenticator](https://github.com/keycloak/keycloak/blob/main/services/src/main/java/org/keycloak/authentication/authenticators/browser/WebAuthnPasswordlessAuthenticator.java), with a touch of customization and love ♥️ on the [UI](src/main/resources/theme-resources/templates/webauthn-conditional-mediation-authenticate.ftl) side.
 
