@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.sozuri.keycloak</groupId>
-  <artifactId>identiyu-keycloak-webauthn-conditional-mediation</artifactId>
-  <version>1.0.1</version>
+  <artifactId>identiyu-keycloak-webauthn-conditional-mediation-Beta1</artifactId>
+  <version>Beta1</version>
   <build>
     <finalName>${project.artifactId}</finalName>
     <plugins>
@@ -135,6 +135,6 @@
     <maven.compiler.source>11</maven.compiler.source>
     <keycloak.version>22.0.3</keycloak.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <artifactId>identiyu-keycloak-webauthn-conditional-mediation</artifactId>
+    <artifactId>identiyu-keycloak-webauthn-conditional-mediation-Beta1</artifactId>
   </properties>
 </project>

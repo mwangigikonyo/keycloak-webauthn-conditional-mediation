@@ -14,6 +14,9 @@ You will find there a cool workshop covering MFA, passkeys, and step-up authenti
 
 cp /Users/mwangigikoyo/.m2/repository/com/google/code/gson/gson/2.10.1/gson-2.10.1-sources.jar ../lib/lib/deployment/
 
+Might not be necessary.
+Add this Quarkus config property ../config/quarkus.properties
+quarkus.http.limits.max-form-attribute-size=50M
 
 ## How does it work?
 
