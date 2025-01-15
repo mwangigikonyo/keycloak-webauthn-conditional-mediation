@@ -114,9 +114,10 @@
 			                        <pattern>org.apache.log4j</pattern>
 			                        <shadedPattern>shaded.org.apache.log4j</shadedPattern>
 			                    </relocation>
-			                    <createDependencyReducedPom>false</createDependencyReducedPom>
-                                
+			                    
 			                </relocations>
+			                <createDependencyReducedPom>false</createDependencyReducedPom>
+                               
                         </configuration>
                     </execution>
                 </executions>
