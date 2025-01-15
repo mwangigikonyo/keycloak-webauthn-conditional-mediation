@@ -86,7 +86,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -114,10 +114,9 @@
 			                        <pattern>org.apache.log4j</pattern>
 			                        <shadedPattern>shaded.org.apache.log4j</shadedPattern>
 			                    </relocation>
-			                    
 			                </relocations>
 			                <createDependencyReducedPom>false</createDependencyReducedPom>
-                               
+                                
                         </configuration>
                     </execution>
                 </executions>
