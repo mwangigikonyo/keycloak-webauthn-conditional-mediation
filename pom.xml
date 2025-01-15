@@ -102,6 +102,14 @@
                                         <exclude>META-INF/*.RSA</exclude>
                                         <exclude>org/keycloak/**</exclude>
                                     </excludes>
+                                    <relocations>
+					                    <!-- Avoid potential classpath conflicts -->
+					                    <relocation>
+					                        <pattern>org.apache.log4j</pattern>
+					                        <shadedPattern>shaded.org.apache.log4j</shadedPattern>
+					                    </relocation>
+					                </relocations>
+					                <createDependencyReducedPom>false</createDependencyReducedPom>
                                 </filter>
                             </filters>
                         </configuration>

@@ -1,7 +1,6 @@
 package net.sozuri.keycloak.authenticator;
 
 import org.keycloak.authentication.Authenticator;
-import org.keycloak.authentication.authenticators.browser.WebAuthnAuthenticator;
 import org.keycloak.authentication.authenticators.browser.WebAuthnAuthenticatorFactory;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.credential.WebAuthnCredentialModel;
