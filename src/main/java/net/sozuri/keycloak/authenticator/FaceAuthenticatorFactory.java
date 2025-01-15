@@ -1,4 +1,4 @@
-package com.twogenidentity.keycloak.authenticator;
+package net.sozuri.keycloak.authenticator;
 
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.authenticators.browser.WebAuthnAuthenticator;

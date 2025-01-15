@@ -1,1 +1,1 @@
-com.twogenidentity.keycloak.authenticator.FaceAuthenticatorFactory
+net.sozuri.keycloak.authenticator.FaceAuthenticatorFactory

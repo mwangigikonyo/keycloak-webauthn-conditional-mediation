@@ -1,4 +1,4 @@
-package com.twogenidentity.keycloak.authenticator.model;
+package net.sozuri.keycloak.authenticator.model;
 
 import java.io.Serializable;
 import java.util.List;

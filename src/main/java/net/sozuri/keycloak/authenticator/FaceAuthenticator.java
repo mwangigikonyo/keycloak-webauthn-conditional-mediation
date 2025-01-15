@@ -1,4 +1,4 @@
-package com.twogenidentity.keycloak.authenticator;
+package net.sozuri.keycloak.authenticator;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -41,10 +41,9 @@ import org.keycloak.models.UserSessionModel;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.sessions.AuthenticationSessionModel;
 
-import com.twogenidentity.keycloak.authenticator.model.IdentiYuCustomer;
-
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
+import net.sozuri.keycloak.authenticator.model.IdentiYuCustomer;
 
 public class FaceAuthenticator extends WebAuthnPasswordlessAuthenticator {
 	
