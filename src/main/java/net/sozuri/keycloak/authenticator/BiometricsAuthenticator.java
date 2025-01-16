@@ -20,8 +20,11 @@ import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.authenticators.browser.WebAuthnPasswordlessAuthenticator;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.KeycloakSessionFactory;
+import org.keycloak.models.KeycloakSessionTask;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.utils.KeycloakModelUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -60,11 +63,32 @@ public class BiometricsAuthenticator extends WebAuthnPasswordlessAuthenticator {
 	
 	@Override
     public void authenticate(AuthenticationFlowContext context) {
-        logger.info("authenticate called ... context = " + context);
- 
-        Response challenge = context.form().createForm("face-validation.ftl");
-        logger.info("\n\n\t Challenge: "+ challenge.toString());
-        context.challenge(challenge);
+		int maxRetries = 3; // Set your desired maximum retries
+        int retryIntervalMillis = 1000; // Set your desired retry interval in milliseconds
+
+        KeycloakSession session = context.getSession();
+        KeycloakSessionFactory sessionFactory = session.getKeycloakSessionFactory();
+        int transactionTimeoutInSeconds = 120; // Set your desired timeout duration
+
+        KeycloakSessionTask task = new KeycloakSessionTask() {
+            @Override
+            public void run(KeycloakSession taskSession) {
+                // TODO here we fetch the plugin's configurations.
+            	// This will most likely be a vault config
+            	logger.info( "Get Identiyu Configurations via Vault here...");
+            }
+        };
+        
+        
+        try {
+            KeycloakModelUtils.runJobInTransactionWithTimeout(sessionFactory, task, transactionTimeoutInSeconds);
+            Response challenge = context.form().createForm("face-validation.ftl");
+            logger.info("\n\n\t Challenge:getStatusInfo() "+ challenge.getStatusInfo());
+            context.challenge(challenge);
+        } catch (Exception e) {
+            context.failureChallenge(AuthenticationFlowError.INTERNAL_ERROR, Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error occurred").build());
+        }
+        
     }
 	
 	

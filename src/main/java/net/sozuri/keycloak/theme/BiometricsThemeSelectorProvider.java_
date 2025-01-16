@@ -1,0 +1,30 @@
+package net.sozuri.keycloak.theme;
+
+import org.jboss.logging.Logger;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.theme.Theme;
+import org.keycloak.theme.ThemeSelectorProvider;
+
+public class BiometricsThemeSelectorProvider implements ThemeSelectorProvider {
+
+	Logger logger = Logger.getLogger(getClass());
+	
+	private KeycloakSession session;
+	
+    public BiometricsThemeSelectorProvider(KeycloakSession session) {
+    	logger.info("\n\n::::: SPI selecting theme constructor invoked::::  \n\n");
+    	this.session = session;
+    }
+
+
+    @Override
+    public String getThemeName(Theme.Type type) {
+    	logger.info("\n\n::::: SPI selecting theme - crobod  \n\n");
+        return "crobod";
+    }
+
+    @Override
+    public void close() {
+    }
+}
+

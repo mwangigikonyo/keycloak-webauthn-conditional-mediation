@@ -1,16 +1,17 @@
 <#import "template.ftl" as layout>
 <@layout.registrationLayout; section>
-    <#if section = "head">
-        <link rel="stylesheet" href="${url.resourcesPath}/css/face-validation.css">
-        <link rel="stylesheet" href="/css/face-validation.css">
-    </#if>
+   
     <#if section = "title">
         ${msg("loginTitle",realm.name)}
     <#elseif section = "form">
+
+        <link rel="stylesheet" href="${url.resourcesPath}/css/face-validation2.css">
+        <link rel="stylesheet" href="/css/face-validation2.css">
+
         <form id="kc-totp-login-form" class="${properties.kcFormClass!}" action="${url.loginAction}" enctype="multipart/form-data" method="post">
             <div class="${properties.kcFormGroupClass!}">
-                  <div class='container-div'>
-                  	<div class='foreground-div videoOverlay'>
+                  <!--
+                  	<div class='foreground-div videoOverlay hiddenDiv'>
                   		<div class='detectionParams'>
                   		</div>
                   		<canvas id="faceOverlayCanvas" width="300" style="position: absolute;  top: 0px; left: 0px; pointer-events: none;"></canvas>
@@ -25,25 +26,64 @@
                     <br>
                     <br>
                     
-                    
-                    <div class="container-div videoContent">
-                     
-                      <div className='foreground-div videoOverlay'>
-                      		<div className='shutterBtn'><span onClick={capturePhoto} className='fa fa-solid fa-camera'></span></div>
-		                    <canvas id='canvas01'  class="${properties.kcInputClass!}" style="display:none;"></canvas>
-		                    <br>
-		                    <br>
-		                    <input id="imageCanvas" name="imageCanvas" type="text" hidden/>
-		                    <div style="width:100%; text-align: center;">            
-		                        <span class="btn" style="margin:20px" id="takeScreenShot">Capture</span>
-		                        <img id='capturedImg2' style="width:25%"></img>
-		                    </div>
-		                    <div className='background-div'>
-		                    	<video id='videoelmt' style="width:100%" autoplay></video>
-		                    </div>
-		              </div>
-		            </div>
-                    <script>
+                    <div class='container-div'>
+                        <div class="container-div videoContent">
+                            <div className='foreground-div videoOverlay'>
+                                <div className='shutterBtn'><span onClick={capturePhoto} className='fa fa-solid fa-camera'></span></div>
+                                <canvas id='canvas01'  class="${properties.kcInputClass!}" style="display:none;"></canvas>
+                                <br>
+                                <br>
+                                <input id="imageCanvas" name="imageCanvas" type="text" hidden/>
+                                <div style="width:100%; text-align: center;">            
+                                    <span class="btn" style="margin:20px" id="takeScreenShot">Capture</span>
+                                    <img id='capturedImg2' style="width:25%"></img>
+                                </div>
+                                <div className='background-div'>
+                                    <video id='videoelmt' style="width:100%" autoplay></video>
+                                </div>
+                            </div>
+		                </div>
+                    </div-->
+
+
+
+                    <div className='container-div videoContent'}>
+
+                        <div className='foreground-div videoOverlay'>
+                            <canvas style="{}
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                pointerEvents: 'none', // Prevent canvas from blocking video interaction,
+                            "></canvas>
+                            <div className='closeBtn' onClick='closeCamera'>
+                                <span className='fa fa-solid fa-close'></span>
+                            </div>
+                        </div>
+                            <div className='detectionParams'>
+                                <div>Confidence: 100%</div>
+                                <div> Age, Gender: 27, M</div>
+                                <div>
+                                    <span className='selfieOk'>Looks good!</span>
+                                </div>
+                            </div>
+                            </div>
+                            <div className='shutterBtn'>
+                                <span onClick={capturePhoto} className='fa fa-solid fa-camera'></span>
+                            </div>
+                        </div>
+                        <div className='background-div'>
+                            <video id='videoDiv' className='videoDiv' autoPlay playsInline style=" width: '100%' " ></video>
+                        </div>
+                    </div>
+
+
+
+
+
+
+                        <script>
+                            /*
                             const constrains = {
                                 video: {
                                     width: {min:1, ideal: 360},
@@ -51,15 +91,15 @@
                                 }
                             };
                             const video = document.getElementById('videoelmt');
-    
+
                             console.log({  video });
                             navigator.mediaDevices.getUserMedia(constrains)
                             .then((stream) => {video.srcObject =stream});
-                             
+                            
                             const buttonTakeScreenShot = document.querySelector('#takeScreenShot');
                             const canvas = document.getElementById('canvas01');
                             const img = document.getElementById('capturedImg2');
-                            console.log({ img })
+                            console.log({ img });
                             const imgText = document.getElementById('imageCanvas');
                             console.log({imgText});
                             buttonTakeScreenShot.onclick = video.onclick =  function(){ 
@@ -72,10 +112,31 @@
                                 console.log(img.src );
                                 imgText.value = img.src;
                             }
-                             
+
+
+
+
+
+                            */
+                            function initVideo(){
+                                const constrains = {
+                                    video: {
+                                        width: {min:1, ideal: 360},
+                                        height: {min:1, ideal: 240}
+                                    }
+                                };
+
+                                const video = document.getElementById('videoDiv');
+                                navigator.mediaDevices.getUserMedia(constrains)
+                                .then((stream) => {video.srcObject =stream});
+
+                            }
+
+
+                            initVideo();
  
                     </script>
-                  </div>
+                 
  
             </div>
  
