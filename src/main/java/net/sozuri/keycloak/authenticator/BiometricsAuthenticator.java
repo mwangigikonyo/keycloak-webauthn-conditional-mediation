@@ -37,6 +37,7 @@ import com.google.gson.JsonParser;
 
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
+import net.sozuri.keycloak.authenticator.model.FaceValidateResponse;
 import net.sozuri.keycloak.authenticator.model.IdentiYuCustomer;
 
 public class BiometricsAuthenticator extends WebAuthnPasswordlessAuthenticator {
@@ -63,7 +64,7 @@ public class BiometricsAuthenticator extends WebAuthnPasswordlessAuthenticator {
 	
 	@Override
     public void authenticate(AuthenticationFlowContext context) {
-		int maxRetries = 3; // Set your desired maximum retries
+		/*int maxRetries = 3; // Set your desired maximum retries
         int retryIntervalMillis = 1000; // Set your desired retry interval in milliseconds
 
         KeycloakSession session = context.getSession();
@@ -77,17 +78,26 @@ public class BiometricsAuthenticator extends WebAuthnPasswordlessAuthenticator {
             	// This will most likely be a vault config
             	logger.info( "Get Identiyu Configurations via Vault here...");
             }
-        };
+        };*/
         
         
-        try {
-            KeycloakModelUtils.runJobInTransactionWithTimeout(sessionFactory, task, transactionTimeoutInSeconds);
-            Response challenge = context.form().createForm("face-validation.ftl");
-            logger.info("\n\n\t Challenge:getStatusInfo() "+ challenge.getStatusInfo());
-            context.challenge(challenge);
+        /*try {
+        	
+        	context.getAuthenticationSession().setAuthNote("identiyuCustomerId", "-1");
+    		context.getAuthenticationSession().setAuthNote("biometricsFound", "false");
+        	//KeycloakModelUtils.runJobInTransactionWithTimeout(sessionFactory, task, transactionTimeoutInSeconds);
+        	context.challenge(context.form()
+        	            .setAttribute("identityCustomerId", "deprecated")
+        	            .createForm("face-validation.ftl"));
+        	
         } catch (Exception e) {
             context.failureChallenge(AuthenticationFlowError.INTERNAL_ERROR, Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error occurred").build());
-        }
+        }*/
+		logger.info("authenticate called ... context = " + context);
+		 
+        Response challenge = context.form().createForm("face-validation.ftl");
+        logger.info("\n\n\t Challenge: "+ challenge.toString());
+        context.challenge(challenge);
         
     }
 	
@@ -95,15 +105,20 @@ public class BiometricsAuthenticator extends WebAuthnPasswordlessAuthenticator {
 	@Override
     public void action(AuthenticationFlowContext context) {
         logger.info("action called ... context = " + context);
-        Response challenge = null;
-        Boolean recognised = validateFace(context);
- 
+        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         
-        if(validateFace(context)) {
+        if(formData.containsKey("doSubmit")) {
+        	logger.info("\n\n------------------formdata contains the word 'doSubmit'-------------------\n\n");      
+        }
+        Response challenge = null;
+        FaceValidateResponse response = validateFace(context);
+        logger.info("\n\n\t response -> "+response.toString()+"\n\n");
+        
+        if(response.getFaceIsValid()) {
             context.success();
         } else {
             challenge = context.form()
-                    .setInfo("Hello " + recognised)
+                    .setInfo("Face Match: " + (response.getSimilarity()*100)+"%, "+(response.getFaceIsValid()?"Biometrics check passed. Logging in":"Biometrics check failed"))
                     .createForm("face-validation.ftl");
             context.failureChallenge(AuthenticationFlowError.UNKNOWN_USER, challenge);
         }
@@ -123,8 +138,9 @@ public class BiometricsAuthenticator extends WebAuthnPasswordlessAuthenticator {
         }
 	}
 	
-	protected Boolean validateFace(AuthenticationFlowContext context) {
+	protected FaceValidateResponse validateFace(AuthenticationFlowContext context) {
 		
+		FaceValidateResponse response = new FaceValidateResponse();
 		
 		try {
 			
@@ -133,29 +149,26 @@ public class BiometricsAuthenticator extends WebAuthnPasswordlessAuthenticator {
 	        
 	        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
 	        String imageData = formData.getFirst("imageCanvas");
-	        logger.info("imageData ==================>" + imageData.substring(0, 50));
 	        
 	        String emailAddress = formData.getFirst("emailAddress");
 	        logger.info("emailAddress ==================>" + emailAddress );
 	        imageData = imageData.split(",")[1];
+	        logger.info("imageData ==================>" + imageData.substring(0, 50));
 	        
 	        String referenceFaceId = createFaceId(getImageBase64(identiyuCustomer.getFace1Url()));
 	        String probeFaceId = createFaceId(imageData);
 	        double score = probeFaceSimilarityToReferenceFace(referenceFaceId, probeFaceId);
 	        logger.info("\n\n\t identiyuCustomer: "+ identiyuCustomer+"\n\t");
 	        
-	        if(score>=0.4) {
-	        	return true;
-	        }else {
-	        	return false;
-	        }
-			
+	        response.setSimilarity(score);
+	        response.setFaceIsValid(score>=0.4);
 			
 	        
 		}catch(Exception e) {
 			logger.error(e);
-			return true;
 		}
+		
+		return response;
  
     }
 
@@ -332,7 +345,7 @@ public class BiometricsAuthenticator extends WebAuthnPasswordlessAuthenticator {
 			
 			final String identiYuSubscriptionKey = "<Subscription Key>";
 			 
-            final String uriBase = "http://localhost:8443";
+            final String uriBase = "https://id-api.sozuri.net";
            
             logger.info(" Calling Face Id. ");
            

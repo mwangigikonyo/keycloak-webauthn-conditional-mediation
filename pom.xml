@@ -32,10 +32,10 @@
     </dependencyManagement>
 
     <dependencies>
-	     <!--dependency->
+	     <dependency>
 	        <groupId>log4j</groupId>
 	        <artifactId>log4j</artifactId>
-	    </dependency-->
+	    </dependency>
     	<dependency>
 		    <groupId>com.google.code.gson</groupId>
 		    <artifactId>gson</artifactId>
