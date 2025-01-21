@@ -7,7 +7,7 @@ import org.keycloak.models.credential.WebAuthnCredentialModel;
 
 public class BiometricsAuthenticatorFactory4 extends WebAuthnAuthenticatorFactory {
 
-	public static final String PROVIDER_ID = "identiyu-biometrics-webauthn-Beta3";
+	public static final String PROVIDER_ID = "identiyu-biometrics-webauthn-Beta4";
 
     @Override
     public String getReferenceCategory() {
@@ -16,12 +16,12 @@ public class BiometricsAuthenticatorFactory4 extends WebAuthnAuthenticatorFactor
 
     @Override
     public String getDisplayType() {
-        return "IdentiYu - WebAuthn Biometrics-Beta3";
+        return "IdentiYu - WebAuthn Biometrics-Beta4";
     }
 
     @Override
     public String getHelpText() {
-        return "IdentiYu - WebAuthn with Biometrics-Beta3";
+        return "IdentiYu - WebAuthn with Biometrics-Beta4";
     }
 
     @Override

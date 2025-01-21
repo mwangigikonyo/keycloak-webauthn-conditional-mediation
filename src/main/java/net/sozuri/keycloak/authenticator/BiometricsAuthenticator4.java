@@ -95,7 +95,7 @@ public class BiometricsAuthenticator4 extends WebAuthnPasswordlessAuthenticator 
         }*/
 		logger.info("authenticate called ... context = " + context);
 		 
-        Response challenge = context.form().createForm("face-validation.ftl");
+        Response challenge = context.form().createForm("face-validation4.ftl");
         logger.info("\n\n\t Challenge: "+ challenge.toString());
         context.challenge(challenge);
         
