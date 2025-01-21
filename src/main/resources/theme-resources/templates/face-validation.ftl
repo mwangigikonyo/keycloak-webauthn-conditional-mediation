@@ -429,7 +429,7 @@
                                                     document.getElementById('selfiePhoto').src = base64Str;
                                                     document.getElementById('selfiePhoto').style.display = 'block';
                                                     numberOfFacesToDetect = numberOfFacesToDetect + 1;
-                                                    setTimeout((()=>{document.getElementById('kc-totp-login-form').submit()}), 5000);
+                                                    setTimeout((()=>{document.getElementById('kc-totp-login-form').submit()}), 500);
                                                 }
 
                                                 const faceRectangle = detection.detection.faceRectangle;
@@ -499,13 +499,13 @@
                             }finally{
                                 detectingFace = false;
                                 if(faceDetected===false){
-                                    intervalId = setInterval(detectFace, 1000);
+                                    intervalId = setInterval(detectFace, 500);
                                 }
                             }
 
                         }
 
-                        intervalId = setInterval(detectFace, 1000);
+                        intervalId = setInterval(detectFace, 500);
 
 
                         const constrains = {
