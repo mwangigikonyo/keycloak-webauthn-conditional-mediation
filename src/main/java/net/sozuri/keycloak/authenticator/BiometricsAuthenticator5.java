@@ -40,10 +40,10 @@ import jakarta.ws.rs.core.Response;
 import net.sozuri.keycloak.authenticator.model.FaceValidateResponse;
 import net.sozuri.keycloak.authenticator.model.IdentiYuCustomer;
 
-public class BiometricsAuthenticator4 extends WebAuthnPasswordlessAuthenticator {
+public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator {
 	
 	
-	public BiometricsAuthenticator4(KeycloakSession session) {
+	public BiometricsAuthenticator5(KeycloakSession session) {
 		super(session);
 	}
 
@@ -56,11 +56,11 @@ public class BiometricsAuthenticator4 extends WebAuthnPasswordlessAuthenticator 
 	    return true;
 	}
 	
-	/*@Override
+	@Override
 	public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
 	   //user.addRequiredAction(“SECRET_QUESTION_REQUIRED_ACTION_PROVIDER_ID”);
 		//user.addRequiredAction("SECRET_QUESTION_REQUIRED_ACTION_PROVIDER_ID");
-	}*/
+	}
 	
 	@Override
     public void authenticate(AuthenticationFlowContext context) {
@@ -399,10 +399,10 @@ public class BiometricsAuthenticator4 extends WebAuthnPasswordlessAuthenticator 
 		return identiYuCustomer;
 	}
 
-	@Override
+	/*@Override
 	public boolean requiresUser() {
 		// TODO Auto-generated method stub
 		return true;
-	}
+	}*/
 
 }
