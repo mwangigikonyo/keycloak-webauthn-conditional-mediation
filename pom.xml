@@ -15,7 +15,7 @@
         
     <groupId>net.sozuri.keycloak</groupId>
     <artifactId>identiyu-keycloak-webauthn-conditional-mediation</artifactId>
-    <version>Beta2</version>
+    <version>Beta3</version>
 
     
 
