@@ -5,7 +5,7 @@ import org.keycloak.authentication.authenticators.browser.WebAuthnAuthenticatorF
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.credential.WebAuthnCredentialModel;
 
-public class BiometricsAuthenticatorFactory3 extends WebAuthnAuthenticatorFactory {
+public class BiometricsAuthenticatorFactory4 extends WebAuthnAuthenticatorFactory {
 
 	public static final String PROVIDER_ID = "identiyu-biometrics-webauthn-Beta3";
 
@@ -26,7 +26,7 @@ public class BiometricsAuthenticatorFactory3 extends WebAuthnAuthenticatorFactor
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        return new BiometricsAuthenticator3(session);
+        return new BiometricsAuthenticator4(session);
     }
 
     @Override
