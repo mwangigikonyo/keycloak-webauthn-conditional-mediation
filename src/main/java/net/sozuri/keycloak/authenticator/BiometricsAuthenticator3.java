@@ -40,10 +40,10 @@ import jakarta.ws.rs.core.Response;
 import net.sozuri.keycloak.authenticator.model.FaceValidateResponse;
 import net.sozuri.keycloak.authenticator.model.IdentiYuCustomer;
 
-public class BiometricsAuthenticator extends WebAuthnPasswordlessAuthenticator {
+public class BiometricsAuthenticator3 extends WebAuthnPasswordlessAuthenticator {
 	
 	
-	public BiometricsAuthenticator(KeycloakSession session) {
+	public BiometricsAuthenticator3(KeycloakSession session) {
 		super(session);
 	}
 
