@@ -37,6 +37,7 @@
         .detectionParams{
             padding: 5px;
             margin: 5px;
+            display:none;
         }
         .background-div{
         position: absolute;
@@ -179,15 +180,15 @@
             border-radius: 25px;
         }
         .genderVal{
-            color:green;
+            color:black;
             text-shadow: 0px 0px 2px #eaffee;
         }
         .ageVal{
-            color:green;
+            color:black;
             text-shadow: 0px 0px 2px #eaffee;
         }
         .selfieAnalysis{
-            color: green;
+            color: black;
             text-shadow: 0px 0px 2px #eaffee;
         }
         
@@ -198,32 +199,6 @@
         <form id="kc-totp-login-form" class="${properties.kcFormClass!}" action="${url.loginAction}" enctype="multipart/form-data" method="post">
             
             <div class="${properties.kcFormGroupClass!}">
-
-                <#--
-
-                <div id='selfieAnalysis' class='container-div'>
-                    <div class='foreground-div videoOverlay'>
-                        <div class='detectionParams'>
-                            <div>Confidence: 100%</div>
-                            <div>Age, Gender: 37, M</div>
-                            <div>
-                                <span class='selfieOk'>Looks good!</span>
-                                <span class='selfieNotOk'>Image should be clear</span>
-                            </div>
-                        </div>
-                        <canvas width="300" id="detectionCanvasRef" style="position: absolute; top: 0; left: 0;"></canvas>
-                    </div>
-                    <div class='background-div'>
-                        <img id='selfiePhoto' class="selfieImg videoDiv" style="display:block;"/>
-                    </div>
-                </div>
-                
-                -->
-
-
-
-
-
                 
                 <div id='cameraSection' class='container-div videoContent visibleDiv'>
 
@@ -235,14 +210,14 @@
                     
 
                         <div>
-                            <div class='detectionParams'>
+                            <div id='detectionParams' class='detectionParams'>
                                 <div id='securityLevel'></div>
-                                <div>Confidence: <span id='confidenceVal' class='confidenceVal'>100%</span></div>
+                                <div>Confidence: <span id='confidenceVal' class='confidenceVal'></span></div>
                                 <div>
-                                    Age, Gender: <span id='ageVal' class='ageVal'>37</span>, <span id='genderVal' class='genderVal'>M</span>
+                                    <span id='ageVal' class='ageVal'></span>, <span id='genderVal' class='genderVal'></span>
                                 </div>
                                 <div>
-                                    <span id='selfieAnalysis' class='selfieAnalysis'>Image should be clear</span>
+                                    <span id='selfieAnalysis' class='selfieAnalysis'></span>
                                 </div>
                             </div>
                         </div>
@@ -263,7 +238,7 @@
 
                         const minimumConfidence = 0.7;
 
-                        document.getElementById('securityLevel').innerHTML = minimumConfidence;
+                        document.getElementById('securityLevel').innerHTML = 'Min confidence: '+ minimumConfidence+'%';
 
                         const calculateRotationAngle = (topLeft, topRight) => {
                             const deltaY = topRight.y - topLeft.y;
@@ -388,7 +363,6 @@
 
                         function detectFace(){
 
-                            console.log(' ::: detectingFace ::::: ',detectingFace);
                             clearInterval(intervalId);
                             
                             try{    
@@ -399,10 +373,11 @@
                                     if(!videoisplaying){
                                         video.play();
                                         return;
+                                    }else{
+                                        document.getElementById('detectionParams').style.display = 'block';
                                     }
                                     if(customerId==''){
                                         (async ()=>{customerId = await createDotCustomer()})();
-                                        return;
                                     }
                                     if (video) {
                                        video.play();
@@ -423,31 +398,29 @@
                                             document.getElementById('imageCanvas').value = base64Str;
                                             
                                             ctx2.clearRect(0, 0, canvas_.width, canvas_.height);
-                                            console.log({ customerId });
-                                            //const customerId = await createDotCustomer();
                                             const detection = await postCustomerSelfie(base64Str, customerId);
-                                            console.log({ detection });
+                                            
                                             if(detection?.detection?.confidence && detection?.detection?.confidence>=minimumConfidence){
 
                                                 document.getElementById('confidenceVal').innerHTML = (detection?.detection?.confidence*100).toFixed(1)+"%";
                                                 
                                                 const customer =  await getCustomer(customerId);
-                                                console.log(' >>> customer?.customer?.age >>> ',customer?.customer?.age);
                                                 if(customer?.customer?.age){
-                                                    document.getElementById('ageVal').innerHTML = customer?.customer?.age?.selfie;
-                                                    document.getElementById('genderVal').innerHTML = customer?.customer?.gender?.selfie;
+                                                    document.getElementById('ageVal').innerHTML = customer?.customer?.age?.selfie + ' years, ';
+                                                    document.getElementById('genderVal').innerHTML = customer?.customer?.gender?.selfie==='M'?'Male': customer?.customer?.gender?.selfie==='F'?'Female':'';
                                                     faceDetected = true;
                                                     
                                                     video.pause();
                                                     document.getElementById('selfiePhoto').src = base64Str;
                                                     document.getElementById('selfiePhoto').style.display = 'block';
                                                     numberOfFacesToDetect = numberOfFacesToDetect + 1;
+                                                    document.getElementById('selfieAnalysis').innerHTML = 'Authenticating... Please wait.';
                                                     setTimeout((()=>{
                                                         if(formSubmitted===false){
                                                             document.getElementById('kc-totp-login-form').submit();
                                                             formSubmitted = true;
                                                         }
-                                                    }), 500);
+                                                    }), 10);
                                                 }
 
                                                 const faceRectangle = detection.detection.faceRectangle;
@@ -536,21 +509,7 @@
 
                         navigator.mediaDevices.getUserMedia(constrains)
                         .then((stream) => {video.srcObject =stream});
-                            
-                        const buttonTakeScreenShot = document.querySelector('#takeScreenShot');
-                        const canvas = document.getElementById('canvas01');
-                        const img = document.getElementById('capturedImg2');
-                        const imgText = document.getElementById('imageCanvas');
-                        buttonTakeScreenShot.onclick = video.onclick =  function(){ 
-                            canvas.width = video.videoWidth;
-                            canvas.height = video.videoHeight;
-                            canvas.getContext('2d').drawImage(video, 0, 0);
-                            const base64Str = canvas.toDataURL('image/png');
-                            console.log({ base64Str });
-                            img.src = canvas.toDataURL('image/jpg');
-                            console.log(img.src );
-                            imgText.value = img.src;
-                        }            
+                                 
                 </script>
             
                 <div class="${properties.kcFormGroupClass!}">
@@ -560,7 +519,7 @@
                     </div>
     
     
-                    <div id="kc-form-buttons" class="${properties.kcFormButtonsClass!}">
+                    <div id="kc-form-buttons" class="${properties.kcFormButtonsClass!} hiddenDiv">
                         <div class="${properties.kcFormButtonsWrapperClass!}">
                             <input class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}" name="login" id="kc-login" type="submit" value="${msg('doSubmit')}"/>
                         </div>

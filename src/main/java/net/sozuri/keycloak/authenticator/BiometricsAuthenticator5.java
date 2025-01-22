@@ -1,6 +1,5 @@
 package net.sozuri.keycloak.authenticator;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
@@ -31,7 +30,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -43,7 +41,8 @@ import net.sozuri.keycloak.authenticator.model.IdentiYuCustomer;
 
 public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator {
 	
-	private final double FACE_MATCH_THRESHHOLD = 0.9;
+	private final double FACE_MATCH_THRESHHOLD = 0.4;
+	
 	public BiometricsAuthenticator5(KeycloakSession session) {
 		super(session);
 	}
@@ -52,7 +51,7 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
 	
 	@Override
 	public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
-	    logger.info("\n\n\t\t :: configuredFor called ... session=" + session + ", realm=" + realm + ", user.getFirstName()=" + user.getFirstName() +"\n\n");
+	    //logger.info("\n\n\t\t :: configuredFor called ... session=" + session + ", realm=" + realm + ", user.getFirstName()=" + user.getFirstName() +"\n\n");
 	    //return session.userCredentialManager().isConfiguredFor(realm, user, "secret_question");
 	    return true;
 	}
@@ -66,7 +65,7 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
 	@Override
     public void authenticate(AuthenticationFlowContext context) {
 		
-		logger.info("authenticate called ... context = " + context);
+		///logger.info("authenticate called ... context = " + context);
 		
 		int maxRetries = 3; // Set your desired maximum retries
         int retryIntervalMillis = 1000; // Set your desired retry interval in milliseconds
@@ -80,7 +79,7 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
             public void run(KeycloakSession taskSession) {
                 // TODO here we fetch the plugin's configurations.
             	// This will most likely be a vault config
-            	logger.info( "Get Identiyu Configurations via Vault here...");
+            	//logger.info( "Get Identiyu Configurations via Vault here...");
             }
         };
         
@@ -108,8 +107,6 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
 	
 	@Override
     public void action(AuthenticationFlowContext context) {
-        logger.info("action called ... context = " + context);
-        
         Response challenge = null;
         FaceValidateResponse response = validateFace(context);
         
@@ -117,7 +114,7 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
         	context.success();
         } else {
         	challenge = context.form()
-                    .setInfo("Face Match: " + (response.getSimilarity()*100)+"%, "+(response.getFaceIsValid()?"Biometrics check passed. Logging in":"Match failed. Minimum face match: "+(FACE_MATCH_THRESHHOLD*100)+" %"))
+        			.setError("Face Match: " + (response.getSimilarity()*100)+"%, "+(response.getFaceIsValid()?"Biometrics check passed. Logging in":"Match failed. Minimum face match: "+(FACE_MATCH_THRESHHOLD*100)+" %"), response)
                     .createForm("face-validation5.ftl");
             context.failureChallenge(AuthenticationFlowError.UNKNOWN_USER, challenge);
         }
@@ -248,8 +245,6 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
 			 
             final String uriBase = "https://id-api.sozuri.net";
            
-            logger.info(" Creating Face Id.");
-           
             URIBuilder builder = new URIBuilder(uriBase);
             builder.setPath("/api/v1/faces");
             
@@ -311,7 +306,6 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
 			
 			UserModel user = context.getUser();//.getFirstAttribute("face_recognition_name");
 	        String userEmail = user.getEmail();
-			logger.info("\n\n\t userEmail : "+ userEmail +"\n\t");
 			
 			client = HttpClientBuilder.create().build();
 			
