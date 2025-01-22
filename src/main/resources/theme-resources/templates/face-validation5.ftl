@@ -349,6 +349,7 @@
                         var faceDetected = false;
                         var detectedFaces = 0;
                         var numberOfFacesToDetect = 3;
+                        var formSubmitted = false;
 
                         var customerId = '';
                         
@@ -381,6 +382,10 @@
                             }
                         }       
 
+                        function isVideoPlaying(video) {
+                            return !video.paused && !video.ended && video.readyState > 2;
+                        }
+
                         function detectFace(){
 
                             console.log(' ::: detectingFace ::::: ',detectingFace);
@@ -390,7 +395,15 @@
                                 if(!detectingFace && faceDetected===false){
                                     detectingFace = true;
                                     const video = document.getElementById('videoelmt');
-                                    
+                                    const videoisplaying = isVideoPlaying(video);
+                                    if(!videoisplaying){
+                                        video.play();
+                                        return;
+                                    }
+                                    if(customerId==''){
+                                        (async ()=>{customerId = await createDotCustomer()})();
+                                        return;
+                                    }
                                     if (video) {
                                        video.play();
                                        const highlightFace = async () => {
@@ -429,7 +442,12 @@
                                                     document.getElementById('selfiePhoto').src = base64Str;
                                                     document.getElementById('selfiePhoto').style.display = 'block';
                                                     numberOfFacesToDetect = numberOfFacesToDetect + 1;
-                                                    setTimeout((()=>{document.getElementById('kc-totp-login-form').submit()}), 500);
+                                                    setTimeout((()=>{
+                                                        if(formSubmitted===false){
+                                                            document.getElementById('kc-totp-login-form').submit();
+                                                            formSubmitted = true;
+                                                        }
+                                                    }), 500);
                                                 }
 
                                                 const faceRectangle = detection.detection.faceRectangle;

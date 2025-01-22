@@ -1,5 +1,6 @@
 package net.sozuri.keycloak.authenticator;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
@@ -42,7 +43,7 @@ import net.sozuri.keycloak.authenticator.model.IdentiYuCustomer;
 
 public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator {
 	
-	
+	private final double FACE_MATCH_THRESHHOLD = 0.9;
 	public BiometricsAuthenticator5(KeycloakSession session) {
 		super(session);
 	}
@@ -51,8 +52,8 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
 	
 	@Override
 	public boolean configuredFor(KeycloakSession session, RealmModel realm, UserModel user) {
-	    logger.info("\n\n\t\t :: configuredFor called ... session=" + session + ", realm=" + realm + ", user=" + user+"\n\n");
-	//  return session.userCredentialManager().isConfiguredFor(realm, user, "secret_question");
+	    logger.info("\n\n\t\t :: configuredFor called ... session=" + session + ", realm=" + realm + ", user.getFirstName()=" + user.getFirstName() +"\n\n");
+	    //return session.userCredentialManager().isConfiguredFor(realm, user, "secret_question");
 	    return true;
 	}
 	
@@ -64,7 +65,10 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
 	
 	@Override
     public void authenticate(AuthenticationFlowContext context) {
-		/*int maxRetries = 3; // Set your desired maximum retries
+		
+		logger.info("authenticate called ... context = " + context);
+		
+		int maxRetries = 3; // Set your desired maximum retries
         int retryIntervalMillis = 1000; // Set your desired retry interval in milliseconds
 
         KeycloakSession session = context.getSession();
@@ -78,26 +82,26 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
             	// This will most likely be a vault config
             	logger.info( "Get Identiyu Configurations via Vault here...");
             }
-        };*/
+        };
         
         
-        /*try {
+        try {
         	
         	context.getAuthenticationSession().setAuthNote("identiyuCustomerId", "-1");
     		context.getAuthenticationSession().setAuthNote("biometricsFound", "false");
-        	//KeycloakModelUtils.runJobInTransactionWithTimeout(sessionFactory, task, transactionTimeoutInSeconds);
-        	context.challenge(context.form()
-        	            .setAttribute("identityCustomerId", "deprecated")
-        	            .createForm("face-validation.ftl"));
+        	KeycloakModelUtils.runJobInTransactionWithTimeout(sessionFactory, task, transactionTimeoutInSeconds);
+        	
+        	Response challenge = context.form()
+    	            .setAttribute("identityCustomerId", "deprecated")
+    	            .createForm("face-validation5.ftl");
+            
+        	context.challenge(challenge);
         	
         } catch (Exception e) {
-            context.failureChallenge(AuthenticationFlowError.INTERNAL_ERROR, Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error occurred").build());
-        }*/
-		logger.info("authenticate called ... context = " + context);
-		 
-        Response challenge = context.form().createForm("face-validation4.ftl");
-        logger.info("\n\n\t Challenge: "+ challenge.toString());
-        context.challenge(challenge);
+        
+        	context.failureChallenge(AuthenticationFlowError.INTERNAL_ERROR, Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error occurred").build());
+        
+        }
         
     }
 	
@@ -105,28 +109,25 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
 	@Override
     public void action(AuthenticationFlowContext context) {
         logger.info("action called ... context = " + context);
-        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         
-        if(formData.containsKey("doSubmit")) {
-        	logger.info("\n\n------------------formdata contains the word 'doSubmit'-------------------\n\n");      
-        }
         Response challenge = null;
         FaceValidateResponse response = validateFace(context);
-        logger.info("\n\n\t response -> "+response.toString()+"\n\n");
         
         if(response.getFaceIsValid()) {
-            context.success();
+        	context.success();
         } else {
-            challenge = context.form()
-                    .setInfo("Face Match: " + (response.getSimilarity()*100)+"%, "+(response.getFaceIsValid()?"Biometrics check passed. Logging in":"Biometrics check failed"))
-                    .createForm("face-validation.ftl");
+        	challenge = context.form()
+                    .setInfo("Face Match: " + (response.getSimilarity()*100)+"%, "+(response.getFaceIsValid()?"Biometrics check passed. Logging in":"Match failed. Minimum face match: "+(FACE_MATCH_THRESHHOLD*100)+" %"))
+                    .createForm("face-validation5.ftl");
             context.failureChallenge(AuthenticationFlowError.UNKNOWN_USER, challenge);
         }
  
     }
 	
 	private String getImageBase64(String imageUrl) {
-		try (InputStream inputStream = new URL(imageUrl).openStream()) {
+		InputStream inputStream = null;
+		try {
+			inputStream = new URL(imageUrl).openStream();
             // Read the image bytes
             byte[] imageBytes = inputStream.readAllBytes();
 
@@ -135,7 +136,15 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
         } catch (Exception e) {
             logger.error(e);
             return null;
+        }finally {
+        	try {
+        		if(inputStream!=null)
+        			inputStream.close();
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
         }
+		
 	}
 	
 	protected FaceValidateResponse validateFace(AuthenticationFlowContext context) {
@@ -150,33 +159,34 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
 	        MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
 	        String imageData = formData.getFirst("imageCanvas");
 	        
-	        String emailAddress = formData.getFirst("emailAddress");
-	        logger.info("emailAddress ==================>" + emailAddress );
-	        imageData = imageData.split(",")[1];
-	        logger.info("imageData ==================>" + imageData.substring(0, 50));
+	        imageData = (!imageData.isEmpty()||imageData!=null)?imageData.split(",")[1]:null;
+	        
+	        if(imageData.isEmpty() || imageData==null)
+	        	throw new Exception("This authenticator expects a base64 string to "
+	        			+ "be passed via the form parameter with the name 'imageCanvas'. "
+	        			+ "However this value seems to be null Actual value["+formData.getFirst("imageCanvas")+"]");
 	        
 	        String referenceFaceId = createFaceId(getImageBase64(identiyuCustomer.getFace1Url()));
 	        String probeFaceId = createFaceId(imageData);
 	        double score = probeFaceSimilarityToReferenceFace(referenceFaceId, probeFaceId);
-	        logger.info("\n\n\t identiyuCustomer: "+ identiyuCustomer+"\n\t");
 	        
 	        response.setSimilarity(score);
-	        response.setFaceIsValid(score>=0.4);
+	        response.setFaceIsValid(score>=FACE_MATCH_THRESHHOLD);
 			
 	        
 		}catch(Exception e) {
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 		}
 		
 		return response;
  
     }
 
-	/*@Override
+	@Override
 	public void close() {
-		// TODO Auto-generated method stub
+		super.close();
 		
-	}*/
+	}
 
 	private double probeFaceSimilarityToReferenceFace(String referenceFaceId, String probeFaceId) {
 		CloseableHttpClient client = null;
@@ -189,20 +199,14 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
 			 
             final String uriBase = "https://id-api.sozuri.net";
            
-            logger.info(" Creating Face Id.");
-           
             URIBuilder builder = new URIBuilder(uriBase);
             builder.setPath("/api/v1/faces/"+probeFaceId+"/similarity");
             
             URI uri = builder.build();
-            String fullUrl = uri.toString();
-            logger.info("\n\n\t\t at probeFaceSimilarityToReferenceFace Full URL >>>>>>>: " + fullUrl+"\n\n");
             HttpPost request = new HttpPost(uri);
             JsonObject referenceFace = new JsonObject();
             referenceFace.addProperty("referenceFace", "/api/v1/faces/"+referenceFaceId);
-            logger.info(" \n\n\t referenceFace.toString() ::: "+referenceFace.toString());
-	        //StringEntity reqEntity = new StringEntity(referenceFace.toString(),ContentType.APPLICATION_JSON);
-	        StringEntity reqEntity = new StringEntity(referenceFace.toString());
+            StringEntity reqEntity = new StringEntity(referenceFace.toString());
             
 	        request.setEntity(reqEntity);
 	        request.setHeader("Content-Type", "application/json");
@@ -211,26 +215,11 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
             HttpEntity entity = response.getEntity();
             
             String jsonString = EntityUtils.toString(entity).trim();
-            logger.info("\n\n\t\t Probe face similarity resp >>>>>>> jsonString :: "+jsonString+"\n\n\n\n");
             JsonElement jsonElement = JsonParser.parseString(jsonString);
             JsonObject responseJson = jsonElement.getAsJsonObject();
-            logger.info("\n\n\t\t probeSimilarity response json :: "+responseJson.toString()+"\n\n\n\n");
+            
             score = responseJson.get("score").getAsDouble();	
-            /*ObjectMapper objectMapper = JsonMapper.builder()
-                    .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-                    .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-                    .build();
-            JsonElement jsonElement = JsonParser.parseString(jsonString);
-            JsonArray jsonArray = jsonElement.getAsJsonArray();
-            logger.info(" \n\n\t\t jsonArray>>>>>>>>> "+ jsonArray +"\n\n\n");
-            ArrayList<IdentiYuCustomer> identiYuCustomers = objectMapper.readValue(jsonString, new TypeReference<ArrayList<IdentiYuCustomer>>() {});
             
-            logger.info("\n\n\n\t IdentiyuCustomers#toString(): "+identiYuCustomers.toString()+" \n\n\n");
-			
-            identiYuCustomer = identiYuCustomers.get(0);
-            
-            logger.info("\n\n\n\t IdentiyuCustomer#toString(): "+identiYuCustomers.toString()+" \n\n\n");
-			*/
 		}catch(Exception e) {
 			e.printStackTrace();
 			logger.error(e);
@@ -265,15 +254,13 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
             builder.setPath("/api/v1/faces");
             
             URI uri = builder.build();
-            String fullUrl = uri.toString();
-            logger.info("\n\n\t\t at createFaceId Full URL >>>>>>>: " + fullUrl+"\n\n");
             HttpPost request = new HttpPost(uri);
             
             JsonObject image = new JsonObject();
 	        image.addProperty("data", imageBase64);
 	        
 	        
-	        com.google.gson.JsonObject detection = new JsonObject();
+	        JsonObject detection = new JsonObject();
 	        detection.addProperty("mode", "STRICT");
 	        
 	        JsonObject faceSizeRatio = new JsonObject();
@@ -296,27 +283,12 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
             HttpEntity entity = response.getEntity();
             
             String jsonString = EntityUtils.toString(entity).trim();
-            logger.info("\n\n\t\t create Face resp >>>>>>> jsonString :: "+jsonString+"\n\n\n\n");
             JsonElement jsonElement = JsonParser.parseString(jsonString);
         	
             JsonObject responseJson = jsonElement.getAsJsonObject();
-            logger.info("\n\n\t\t create Face resp >>>>>>> responseJson.get(\"id\").getAsString() :: "+responseJson.get("id").getAsString()+"\n\n\n\n");
-            /*ObjectMapper objectMapper = JsonMapper.builder()
-                    .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-                    .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-                    .build();
-            JsonElement jsonElement = JsonParser.parseString(jsonString);
-            JsonArray jsonArray = jsonElement.getAsJsonArray();
-            logger.info(" \n\n\t\t jsonArray>>>>>>>>> "+ jsonArray +"\n\n\n");
-            ArrayList<IdentiYuCustomer> identiYuCustomers = objectMapper.readValue(jsonString, new TypeReference<ArrayList<IdentiYuCustomer>>() {});
             
-            logger.info("\n\n\n\t IdentiyuCustomers#toString(): "+identiYuCustomers.toString()+" \n\n\n");
-			
-            identiYuCustomer = identiYuCustomers.get(0);
-            
-            logger.info("\n\n\n\t IdentiyuCustomer#toString(): "+identiYuCustomers.toString()+" \n\n\n");
-			*/
             ref = responseJson.get("id").getAsString();
+		
 		}catch(Exception e) {
 			e.printStackTrace();
 			logger.error(e);
@@ -347,10 +319,7 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
 			 
             final String uriBase = "https://id-api.sozuri.net";
            
-            logger.info(" Calling Face Id. ");
-           
             URIBuilder builder = new URIBuilder(uriBase);
-            ///apiv1/customer?emailAddress=mwangi.gikonyo.t@gmail.com&sort=cretionTime%20DESC&limit=1
             builder.setPath("/apiv1/customer");
             builder.setParameter("emailAddress", userEmail);
             builder.setParameter("sort", "creationTime DESC");
@@ -358,8 +327,6 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
             builder.setParameter("isDeleted", "false");
            
             URI uri = builder.build();
-            String fullUrl = uri.toString();
-            logger.info("\n\n\t\t Full URL >>>>>>>: " + fullUrl+"\n\n");
             HttpGet request = new HttpGet(uri);
             
             request.setHeader("IdentiYu-Subscription-Key", identiYuSubscriptionKey);
@@ -370,22 +337,16 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
             HttpEntity entity = response.getEntity();
             
             String jsonString = EntityUtils.toString(entity).trim();
-            logger.info("\n\n\t\t get IdentiYu User resp >>>>>>> jsonString :: "+jsonString+"\n\n\n\n");
+            
             ObjectMapper objectMapper = JsonMapper.builder()
                     .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
                     .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
                     .build();
-            JsonElement jsonElement = JsonParser.parseString(jsonString);
-            JsonArray jsonArray = jsonElement.getAsJsonArray();
-            logger.info(" \n\n\t\t jsonArray>>>>>>>>> "+ jsonArray +"\n\n\n");
+            
             ArrayList<IdentiYuCustomer> identiYuCustomers = objectMapper.readValue(jsonString, new TypeReference<ArrayList<IdentiYuCustomer>>() {});
             
-            logger.info("\n\n\n\t IdentiyuCustomers#toString(): "+identiYuCustomers.toString()+" \n\n\n");
-			
             identiYuCustomer = identiYuCustomers.get(0);
             
-            logger.info("\n\n\n\t IdentiyuCustomer#toString(): "+identiYuCustomers.toString()+" \n\n\n");
-			
 		}catch(Exception e) {
 			logger.error(e);
 		}finally {
@@ -399,10 +360,9 @@ public class BiometricsAuthenticator5 extends WebAuthnPasswordlessAuthenticator 
 		return identiYuCustomer;
 	}
 
-	/*@Override
+	@Override
 	public boolean requiresUser() {
-		// TODO Auto-generated method stub
 		return true;
-	}*/
+	}
 
 }
