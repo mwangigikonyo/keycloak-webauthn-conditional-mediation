@@ -193,9 +193,9 @@
         }
         
         </style>
-        
+        <#--
         <link rel="stylesheet" href="${url.resourcesPath}/css/face-validation.css">
-        
+        -->
         <form id="kc-totp-login-form" class="${properties.kcFormClass!}" action="${url.loginAction}" enctype="multipart/form-data" method="post">
             
             <div class="${properties.kcFormGroupClass!}">
